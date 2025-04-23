@@ -170,7 +170,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.824306, y: 0}
+  m_Offset: {x: 2.0327816, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -180,7 +180,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 13.057492, y: 1}
+  m_Size: {x: 36.88168, y: 1}
   m_EdgeRadius: 0
 --- !u!4 &213583562
 Transform:
@@ -228,13 +228,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 608ea39beab9e274098b7769704e6d6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 8
-  jumpForce: 20
   groundCheck: {fileID: 1918991007}
   wallCheck: {fileID: 1769612288}
   groundMask:
     serializedVersion: 2
     m_Bits: 8
+  flip: 1
+  speed: 8
+  jumpForce: 20
+  dashDuration: 0.2
+  dashCooldown: 1
+  dashSpeed: 20
 --- !u!4 &246752561
 Transform:
   m_ObjectHideFlags: 0

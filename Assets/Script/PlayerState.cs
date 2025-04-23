@@ -6,7 +6,7 @@ public class PlayerState
     protected Player player;
     protected float xInput;
     protected Rigidbody2D rb;
-
+    protected float stateTimer = 0f;
     private string animBoolName;
 
     public PlayerState(PlayerStateMachine _stateMachine, Player _player, string _animBoolName)
@@ -27,19 +27,22 @@ public class PlayerState
     }
     public virtual void Update()
     {
-        xInput = Input.GetAxisRaw("Horizontal");
-        player.anim.SetFloat("yVelocity", rb.linearVelocityY);
-        player.SetVelocity(xInput * player.speed, player.rb.linearVelocityY);
-        switch (player.isGrounded())
+        stateTimer -= Time.deltaTime;
+        if (stateTimer < 0)
         {
-            case false:
-                stateMachine.ChangeState(player.jumpState);
-                break;
-            case true:
-                if (Input.GetButtonDown("Jump"))
+            xInput = Input.GetAxisRaw("Horizontal");
+            player.anim.SetFloat("yVelocity", rb.linearVelocityY);
+            player.SetVelocity(xInput * player.speed, player.rb.linearVelocityY);
+            switch (player.isGrounded())
+            {
+                case false:
                     stateMachine.ChangeState(player.jumpState);
-                break;
+                    break;
+                case true:
+                    if (Input.GetButtonDown("Jump"))
+                        stateMachine.ChangeState(player.jumpState);
+                    break;
+            }
         }
-
     }
 }
