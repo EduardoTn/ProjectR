@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -23,6 +24,7 @@ public class Player : MonoBehaviour
     public PlayerMoveState moveState { get; private set; }
     public PlayerJumpState jumpState { get; private set; }
     public PlayerDashState dashState { get; private set; }
+    public PlayerWallSlideState wallState { get; private set; }
     #endregion
     void Awake()
     {
@@ -31,6 +33,7 @@ public class Player : MonoBehaviour
         moveState = new PlayerMoveState(stateMachine, this, "Move");
         jumpState = new PlayerJumpState(stateMachine, this, "Jump");
         dashState = new PlayerDashState(stateMachine, this, "Dash");
+        wallState = new PlayerWallSlideState(stateMachine, this, "WallSlide");
     }
 
     private void Start()
@@ -52,6 +55,9 @@ public class Player : MonoBehaviour
         rb.linearVelocity = new Vector2(_xVelocity, _yVelocity);
     }
     public bool isGrounded() => Physics2D.Raycast(groundCheck.position, Vector2.down, 0.15f, groundMask);
+    public bool isWalled() => Physics2D.Raycast(wallCheck.position, Vector2.right, 0.1f, groundMask);
+    public void wallJump() => StartCoroutine(doJump());
+
     public void Flip()
     {
         flip = !flip;
@@ -76,5 +82,14 @@ public class Player : MonoBehaviour
         {
             Flip();
         }
+    }
+
+    IEnumerator doJump()
+    {
+        rb.AddForce(new Vector2(dashSpeed * (flip ? -1 : 1), jumpForce), ForceMode2D.Impulse);
+        stateMachine.ChangeState(jumpState);
+        stateMachine.currentState.ignoreInput = true;
+        yield return new WaitForSeconds(.2f);
+        stateMachine.currentState.ignoreInput = false;
     }
 }

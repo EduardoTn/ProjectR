@@ -9,7 +9,7 @@ public class PlayerJumpState : PlayerState
     public override void Enter()
     {
         base.Enter();
-        if(player.isGrounded())
+        if (player.isGrounded())
             rb.linearVelocity = new Vector2(rb.linearVelocityX, player.jumpForce);
     }
 
@@ -23,5 +23,7 @@ public class PlayerJumpState : PlayerState
         base.Update();
         if (rb.linearVelocityY == 0 && player.isGrounded())
             stateMachine.ChangeState(player.idleState);
+        if(player.isWalled())
+            stateMachine.ChangeState(player.wallState);
     }
 }

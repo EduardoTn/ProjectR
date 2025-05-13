@@ -8,6 +8,7 @@ public class PlayerState
     protected Rigidbody2D rb;
     protected float stateTimer = 0f;
     private string animBoolName;
+    public bool ignoreInput = false;
 
     public PlayerState(PlayerStateMachine _stateMachine, Player _player, string _animBoolName)
     {
@@ -32,11 +33,13 @@ public class PlayerState
         {
             xInput = Input.GetAxisRaw("Horizontal");
             player.anim.SetFloat("yVelocity", rb.linearVelocityY);
-            player.SetVelocity(xInput * player.speed, player.rb.linearVelocityY);
+            if(!ignoreInput)
+                player.SetVelocity(xInput * player.speed, player.rb.linearVelocityY);
             switch (player.isGrounded())
             {
                 case false:
-                    stateMachine.ChangeState(player.jumpState);
+                    if(!player.isWalled() && !ignoreInput)
+                        stateMachine.ChangeState(player.jumpState);
                     break;
                 case true:
                     if (Input.GetButtonDown("Jump"))

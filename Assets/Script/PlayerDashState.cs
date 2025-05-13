@@ -24,6 +24,8 @@ public class PlayerDashState : PlayerState
         if (stateTimer <= 0)
         {
             stateMachine.ChangeState(player.idleState);
+            if (player.isWalled())
+                stateMachine.ChangeState(player.wallState);
         }
     }
 }
