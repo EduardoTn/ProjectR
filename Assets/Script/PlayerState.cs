@@ -9,6 +9,7 @@ public class PlayerState
     protected float stateTimer = 0f;
     private string animBoolName;
     public bool ignoreInput = false;
+    protected bool triggerCalled;
 
     public PlayerState(PlayerStateMachine _stateMachine, Player _player, string _animBoolName)
     {
@@ -21,6 +22,7 @@ public class PlayerState
     public virtual void Enter()
     {
         player.anim.SetBool(animBoolName, true);
+        triggerCalled = false;
     }
     public virtual void Exit()
     {
@@ -33,8 +35,10 @@ public class PlayerState
         {
             xInput = Input.GetAxisRaw("Horizontal");
             player.anim.SetFloat("yVelocity", rb.linearVelocityY);
-            if(!ignoreInput)
+            if (!ignoreInput)
+            {
                 player.SetVelocity(xInput * player.speed, player.rb.linearVelocityY);
+            }
             switch (player.isGrounded())
             {
                 case false:
@@ -44,8 +48,15 @@ public class PlayerState
                 case true:
                     if (Input.GetButtonDown("Jump"))
                         stateMachine.ChangeState(player.jumpState);
+                    if (Input.GetKey(KeyCode.Mouse0) && !ignoreInput)
+                        stateMachine.ChangeState(player.attackState);
                     break;
             }
         }
+    }
+
+    public virtual void AnimationFinishTrigger()
+    {
+        triggerCalled = true;
     }
 }

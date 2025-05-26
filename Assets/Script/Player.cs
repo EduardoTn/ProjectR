@@ -17,6 +17,7 @@ public class Player : MonoBehaviour
     private float dashInCooldown = 0f;
     public float dashCooldown = 1f;
     public float dashSpeed = 15;
+    public Vector2[] AttackMovement;
     #endregion
     #region States
     public PlayerStateMachine stateMachine { get; private set; }
@@ -25,6 +26,13 @@ public class Player : MonoBehaviour
     public PlayerJumpState jumpState { get; private set; }
     public PlayerDashState dashState { get; private set; }
     public PlayerWallSlideState wallState { get; private set; }
+    public PlayerAttackState attackState { get; private set; }
+    #endregion
+    #region Listeners
+    public bool isGrounded() => Physics2D.Raycast(groundCheck.position, Vector2.down, 0.15f, groundMask);
+    public bool isWalled() => Physics2D.Raycast(wallCheck.position, Vector2.right, 0.1f, groundMask);
+    public void wallJump() => StartCoroutine(doJump());
+    public void animationTrigger() => stateMachine.currentState.AnimationFinishTrigger();
     #endregion
     void Awake()
     {
@@ -34,16 +42,14 @@ public class Player : MonoBehaviour
         jumpState = new PlayerJumpState(stateMachine, this, "Jump");
         dashState = new PlayerDashState(stateMachine, this, "Dash");
         wallState = new PlayerWallSlideState(stateMachine, this, "WallSlide");
+        attackState = new PlayerAttackState(stateMachine, this, "Attack");
     }
-
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponentInChildren<Animator>();
         stateMachine.Initialize(idleState);
     }
-
-    // Update is called once per frame
     void Update()
     {
         stateMachine.currentState.Update();
@@ -54,10 +60,6 @@ public class Player : MonoBehaviour
     {
         rb.linearVelocity = new Vector2(_xVelocity, _yVelocity);
     }
-    public bool isGrounded() => Physics2D.Raycast(groundCheck.position, Vector2.down, 0.15f, groundMask);
-    public bool isWalled() => Physics2D.Raycast(wallCheck.position, Vector2.right, 0.1f, groundMask);
-    public void wallJump() => StartCoroutine(doJump());
-
     public void Flip()
     {
         flip = !flip;
@@ -89,7 +91,7 @@ public class Player : MonoBehaviour
         rb.AddForce(new Vector2(dashSpeed * (flip ? -1 : 1), jumpForce), ForceMode2D.Impulse);
         stateMachine.ChangeState(jumpState);
         stateMachine.currentState.ignoreInput = true;
-        yield return new WaitForSeconds(.2f);
+        yield return new WaitForSeconds(.3f);
         stateMachine.currentState.ignoreInput = false;
     }
 }

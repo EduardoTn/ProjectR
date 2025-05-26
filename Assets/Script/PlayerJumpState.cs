@@ -21,9 +21,9 @@ public class PlayerJumpState : PlayerState
     public override void Update()
     {
         base.Update();
-        if (rb.linearVelocityY == 0 && player.isGrounded())
+        if (player.isGrounded())
             stateMachine.ChangeState(player.idleState);
-        if(player.isWalled())
+        if(player.isWalled() && rb.linearVelocityY <= 0)
             stateMachine.ChangeState(player.wallState);
     }
 }
