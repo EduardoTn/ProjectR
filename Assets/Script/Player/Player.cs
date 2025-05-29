@@ -1,15 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Entity
 {
     #region Components
-    public Animator anim { get; private set; }
-    public Rigidbody2D rb { get; private set; }
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private Transform wallCheck;
-    [SerializeField] private LayerMask groundMask;
-    public bool flip = true;
+    public LayerMask enemyMask;
     [Header("move info")]
     public float speed;
     public float jumpForce;
@@ -20,7 +15,6 @@ public class Player : MonoBehaviour
     public Vector2[] AttackMovement;
     #endregion
     #region States
-    public PlayerStateMachine stateMachine { get; private set; }
     public PlayerIdleState idleState { get; private set; }
     public PlayerMoveState moveState { get; private set; }
     public PlayerJumpState jumpState { get; private set; }
@@ -29,14 +23,12 @@ public class Player : MonoBehaviour
     public PlayerAttackState attackState { get; private set; }
     #endregion
     #region Listeners
-    public bool isGrounded() => Physics2D.Raycast(groundCheck.position, Vector2.down, 0.15f, groundMask);
-    public bool isWalled() => Physics2D.Raycast(wallCheck.position, Vector2.right, 0.1f, groundMask);
     public void wallJump() => StartCoroutine(doJump());
-    public void animationTrigger() => stateMachine.currentState.AnimationFinishTrigger();
     #endregion
-    void Awake()
+    #region Unity
+    protected override void Awake()
     {
-        stateMachine = new PlayerStateMachine();
+        base.Awake();
         idleState = new PlayerIdleState(stateMachine, this, "Idle");
         moveState = new PlayerMoveState(stateMachine, this, "Move");
         jumpState = new PlayerJumpState(stateMachine, this, "Jump");
@@ -44,27 +36,18 @@ public class Player : MonoBehaviour
         wallState = new PlayerWallSlideState(stateMachine, this, "WallSlide");
         attackState = new PlayerAttackState(stateMachine, this, "Attack");
     }
-    private void Start()
+    protected override void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        anim = GetComponentInChildren<Animator>();
+        base.Start();
         stateMachine.Initialize(idleState);
     }
-    void Update()
+    protected override void Update()
     {
-        stateMachine.currentState.Update();
+        base.Update();
         FlipController();
         DashController();
     }
-    public void SetVelocity(float _xVelocity, float _yVelocity)
-    {
-        rb.linearVelocity = new Vector2(_xVelocity, _yVelocity);
-    }
-    public void Flip()
-    {
-        flip = !flip;
-        transform.Rotate(0f, 180f, 0f);
-    }
+    #endregion
     private void DashController()
     {
         dashInCooldown -= Time.deltaTime;
@@ -77,20 +60,21 @@ public class Player : MonoBehaviour
     }
     public void FlipController()
     {
-        if (rb.linearVelocityX > 0 && !flip)
+        PlayerState currentState = (PlayerState)stateMachine.currentState;
+        if ((rb.linearVelocityX > 0 && currentState.xInput > 0) && !flip)
         {
             Flip();
-        } else if (rb.linearVelocityX < 0 && flip)
+        } else if ((rb.linearVelocityX < 0 && currentState.xInput < 0) && flip)
         {
             Flip();
         }
     }
-
     IEnumerator doJump()
     {
         rb.AddForce(new Vector2(dashSpeed * (flip ? -1 : 1), jumpForce), ForceMode2D.Impulse);
         stateMachine.ChangeState(jumpState);
         stateMachine.currentState.ignoreInput = true;
+        Flip();
         yield return new WaitForSeconds(.3f);
         stateMachine.currentState.ignoreInput = false;
     }

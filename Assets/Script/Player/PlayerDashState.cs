@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerDashState : PlayerState
 {
-    public PlayerDashState(PlayerStateMachine _stateMachine, Player _player, string _animBoolName) : base(_stateMachine, _player, _animBoolName)
+    public PlayerDashState(StateMachine _stateMachine, Player _player, string _animBoolName) : base(_stateMachine, _player, _animBoolName)
     {
     }
 
@@ -10,11 +10,14 @@ public class PlayerDashState : PlayerState
     {
         base.Enter();
         stateTimer = player.dashDuration;
+        player.rb.excludeLayers = player.enemyMask;
     }
 
     public override void Exit()
     {
+        ignoreInput = false;
         base.Exit();
+        player.rb.excludeLayers = LayerMask.GetMask("Nothing");
     }
 
     public override void Update()

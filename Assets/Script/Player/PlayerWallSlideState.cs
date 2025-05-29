@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerWallSlideState : PlayerState
 {
-    public PlayerWallSlideState(PlayerStateMachine _stateMachine, Player _player, string _animBoolName) : base(_stateMachine, _player, _animBoolName)
+    public PlayerWallSlideState(StateMachine _stateMachine, Player _player, string _animBoolName) : base(_stateMachine, _player, _animBoolName)
     {
 
     }
