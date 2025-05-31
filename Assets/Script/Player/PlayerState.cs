@@ -33,17 +33,28 @@ public class PlayerState : State
             {
                 player.SetVelocity(xInput * player.speed, player.rb.linearVelocityY);
             }
-            switch (player.isGrounded())
+            switch (player.isKnocked)
             {
-                case false:
-                    if(!player.isWalled() && !ignoreInput)
-                        stateMachine.ChangeState(player.jumpState);
-                    break;
                 case true:
-                    if (Input.GetButtonDown("Jump"))
-                        stateMachine.ChangeState(player.jumpState);
-                    if (Input.GetKey(KeyCode.Mouse0) && !ignoreInput)
-                        stateMachine.ChangeState(player.attackState);
+                    stateMachine.ChangeState(player.hitState);
+                    break;
+                case false:
+                    if (!ignoreInput)
+                    {
+                        switch (player.isGrounded())
+                        {
+                            case false:
+                                if (!player.isWalled())
+                                    stateMachine.ChangeState(player.jumpState);
+                                break;
+                            case true:
+                                if (Input.GetButtonDown("Jump"))
+                                    stateMachine.ChangeState(player.jumpState);
+                                if (Input.GetKey(KeyCode.Mouse0))
+                                    stateMachine.ChangeState(player.attackState);
+                                break;
+                        }
+                    }
                     break;
             }
         }

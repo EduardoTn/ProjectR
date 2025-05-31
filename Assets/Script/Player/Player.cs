@@ -1,18 +1,19 @@
 using System.Collections;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Player : Entity
 {
     #region Components
+    public float counterAttackDuration = .2f;
     public LayerMask enemyMask;
-    [Header("move info")]
+    public SkillManager skill;
+    [Header("Move info")]
     public float speed;
     public float jumpForce;
     public float dashDuration = 0.5f;
-    private float dashInCooldown = 0f;
-    public float dashCooldown = 1f;
     public float dashSpeed = 15;
-    public Vector2[] AttackMovement;
+    public Vector2[] attackMovement;
     #endregion
     #region States
     public PlayerIdleState idleState { get; private set; }
@@ -21,6 +22,8 @@ public class Player : Entity
     public PlayerDashState dashState { get; private set; }
     public PlayerWallSlideState wallState { get; private set; }
     public PlayerAttackState attackState { get; private set; }
+    public PlayerHitState hitState { get; private set; }
+    public PlayerCounterState counterState { get; private set; }
     #endregion
     #region Listeners
     public void wallJump() => StartCoroutine(doJump());
@@ -35,47 +38,57 @@ public class Player : Entity
         dashState = new PlayerDashState(stateMachine, this, "Dash");
         wallState = new PlayerWallSlideState(stateMachine, this, "WallSlide");
         attackState = new PlayerAttackState(stateMachine, this, "Attack");
+        hitState = new PlayerHitState(stateMachine, this, "Hit");
+        counterState = new PlayerCounterState(stateMachine, this, "Counter");
     }
     protected override void Start()
     {
         base.Start();
+        skill = SkillManager.instance;
         stateMachine.Initialize(idleState);
     }
     protected override void Update()
     {
         base.Update();
-        FlipController();
+        CounterController();
         DashController();
     }
     #endregion
+    #region Controllers
     private void DashController()
     {
-        dashInCooldown -= Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.LeftShift) && dashInCooldown < 0)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && skill.dash.CanUseSkill())
         {
-            dashInCooldown = dashCooldown;
+            isKnocked = false;
             stateMachine.ChangeState(dashState);
-
+            skill.dash.UseSkill();
         }
     }
-    public void FlipController()
+    private void CounterController()
     {
-        PlayerState currentState = (PlayerState)stateMachine.currentState;
-        if ((rb.linearVelocityX > 0 && currentState.xInput > 0) && !flip)
+        if (Input.GetKey(KeyCode.Q) && skill.parry.CanUseSkill())
         {
-            Flip();
-        } else if ((rb.linearVelocityX < 0 && currentState.xInput < 0) && flip)
-        {
-            Flip();
+            stateMachine.ChangeState(counterState);
+            skill.parry.UseSkill();
         }
     }
+    public override void Damage(bool isHeavy, Entity attacker)
+    {
+        if (stateMachine.currentState is not PlayerDashState)
+        {
+            base.Damage(isHeavy, attacker);
+        }
+    }
+    #endregion
+    #region Actions
     IEnumerator doJump()
     {
-        rb.AddForce(new Vector2(dashSpeed * (flip ? -1 : 1), jumpForce), ForceMode2D.Impulse);
+        rb.linearVelocity = new Vector2(dashSpeed * (flip ? -1 : 1), jumpForce + speed);
         stateMachine.ChangeState(jumpState);
         stateMachine.currentState.ignoreInput = true;
         Flip();
         yield return new WaitForSeconds(.3f);
         stateMachine.currentState.ignoreInput = false;
     }
+    #endregion
 }

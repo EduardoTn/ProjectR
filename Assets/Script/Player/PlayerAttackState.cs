@@ -14,9 +14,9 @@ public class PlayerAttackState : PlayerState
         base.Enter();
         ignoreInput = true;
         player.SetVelocity(0f, 0f);
-        if (comboCounter > 2 || Time.time >= lastTimeAttacked + comboWindow)
+        if (comboCounter > 3 || Time.time >= lastTimeAttacked + comboWindow)
             comboCounter = 0;
-        player.SetVelocity(player.AttackMovement[comboCounter].x * (player.flip ? 1 : -1), player.AttackMovement[comboCounter].y);
+        player.SetVelocity(player.attackMovement[comboCounter].x * (player.flip ? 1 : -1), player.attackMovement[comboCounter].y);
         player.anim.SetInteger("ComboCounter", comboCounter);
 
     }

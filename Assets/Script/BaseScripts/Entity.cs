@@ -1,15 +1,24 @@
+using System.Collections;
 using UnityEngine;
 
 public class Entity : MonoBehaviour
 {
     #region Components
-
+    [Header("Knockback info")]
+    [SerializeField] protected float knockbackDuration;
+    public Vector2 knockbackDirection;
+    public bool isKnocked;
+    [Header("Collision info")]
     [SerializeField] protected Transform groundCheck;
     [SerializeField] protected Transform wallCheck;
     [SerializeField] protected LayerMask groundMask;
     [SerializeField] protected float wallDistance = 0.1f;
     [SerializeField] protected float groundDistance = 0.15f;
+    public Transform attackCheck;
+    public float attackCheckRadius;
     public Rigidbody2D rb;
+    [Header("Animation info")]
+    public EntityFX fx { get; private set; }
     public Animator anim;
     public bool flip = true;
     public StateMachine stateMachine { get; private set; }
@@ -21,6 +30,7 @@ public class Entity : MonoBehaviour
     #endregion
     protected virtual void Start()
     {
+        fx = GetComponent<EntityFX>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponentInChildren<Animator>();
     }
@@ -35,13 +45,45 @@ public class Entity : MonoBehaviour
     {
         stateMachine.currentState.Update();
     }
+    public virtual void Damage(bool isHeavy, Entity attacker)
+    {
+        fx.StartCoroutine("FlashFX");
+        if (isHeavy)
+            StartCoroutine(KnockBack(attacker));
+    }
     public virtual void SetVelocity(float _xVelocity, float _yVelocity)
     {
+        if (isKnocked)
+            return;
         rb.linearVelocity = new Vector2(_xVelocity, _yVelocity);
+        FlipController(_xVelocity);
     }
-    public void Flip()
+    public virtual void Flip()
     {
         flip = !flip;
         transform.Rotate(0f, 180f, 0f);
+    }
+    public virtual void FlipController(float _x)
+    {
+        if (rb.linearVelocityX > 0 && !flip)
+        {
+            Flip();
+        }
+        else if (rb.linearVelocityX < 0 && flip)
+        {
+            Flip();
+        }
+    }
+    protected virtual void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(attackCheck.position, attackCheckRadius);
+    }
+
+    protected virtual IEnumerator KnockBack(Entity attacker)
+    {
+        isKnocked = true;
+        rb.linearVelocity = new Vector2(knockbackDirection.x * (attacker.flip ? 1 : -1), knockbackDirection.y);
+        yield return new WaitForSeconds(knockbackDuration);
+        isKnocked = false;
     }
 }

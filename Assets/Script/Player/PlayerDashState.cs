@@ -11,12 +11,14 @@ public class PlayerDashState : PlayerState
         base.Enter();
         stateTimer = player.dashDuration;
         player.rb.excludeLayers = player.enemyMask;
+        if (player.skill.clone.CanUseSkill())
+            player.skill.clone.UseSkill();
     }
 
     public override void Exit()
     {
-        ignoreInput = false;
         base.Exit();
+        ignoreInput = false;
         player.rb.excludeLayers = LayerMask.GetMask("Nothing");
     }
 

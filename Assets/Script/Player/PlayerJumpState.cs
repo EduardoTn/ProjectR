@@ -12,12 +12,6 @@ public class PlayerJumpState : PlayerState
         if (player.isGrounded())
             rb.linearVelocity = new Vector2(rb.linearVelocityX, player.jumpForce);
     }
-
-    public override void Exit()
-    {
-        base.Exit();
-    }
-
     public override void Update()
     {
         base.Update();
