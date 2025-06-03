@@ -18,6 +18,7 @@ public class Entity : MonoBehaviour
     public float attackCheckRadius;
     public Rigidbody2D rb;
     [Header("Animation info")]
+    protected SpriteRenderer sr;
     public EntityFX fx { get; private set; }
     public Animator anim;
     public bool flip = true;
@@ -33,6 +34,7 @@ public class Entity : MonoBehaviour
         fx = GetComponent<EntityFX>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponentInChildren<Animator>();
+        sr = GetComponentInChildren<SpriteRenderer>();
     }
 
     protected virtual void Awake()
@@ -85,5 +87,17 @@ public class Entity : MonoBehaviour
         rb.linearVelocity = new Vector2(knockbackDirection.x * (attacker.flip ? 1 : -1), knockbackDirection.y);
         yield return new WaitForSeconds(knockbackDuration);
         isKnocked = false;
+    }
+
+    public void MakeTransparent(bool _transparent)
+    {
+        if (_transparent)
+        {
+            sr.color = Color.clear;
+        }
+        else
+        {
+            sr.color = Color.white;
+        }
     }
 }

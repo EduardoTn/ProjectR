@@ -6,6 +6,7 @@ public class SkillManager : MonoBehaviour
     public DashSkill dash;
     public ParrySkill parry;
     public CloneSkill clone;
+    public BlackHoleSkill blackHole;
     private void Awake()
     {
         if (instance != null) 
@@ -18,5 +19,6 @@ public class SkillManager : MonoBehaviour
         dash = GetComponent<DashSkill>();
         parry = GetComponent<ParrySkill>();
         clone = GetComponent<CloneSkill>();
+        blackHole = GetComponent<BlackHoleSkill>();
     }
 }

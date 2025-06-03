@@ -1,15 +1,19 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CloneSkillController : MonoBehaviour
 {
     [SerializeField] Transform attackCheck;
-    [SerializeField] float attackCheckRadius = 1f;
+    [SerializeField] float attackCheckRadius = 1;
+    [SerializeField] GameObject clone;
     private float cloneDuration;
     private float colorLoosingSpeed;
     private SpriteRenderer sr;
     private float cloneTimer;
     private Animator anim;
     private Player player;
+    public bool flip;
+
     private void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
@@ -18,9 +22,14 @@ public class CloneSkillController : MonoBehaviour
         cloneDuration = SkillManager.instance.clone.cloneDuration;
         colorLoosingSpeed = SkillManager.instance.clone.colorLoosingSpeed;
         cloneTimer = cloneDuration;
-        anim.SetInteger("AttackNumber", Random.Range(1,3));
-        if (!player.flip)
+        anim.SetInteger("AttackNumber", Random.Range(1, 3));
+        if (!flip)
             transform.Rotate(0f, 180f, 0f);
+    }
+    public void CreateClone(Vector3 _position, bool _flip, GameObject clone)
+    {
+        clone.GetComponent<CloneSkillController>().flip = _flip;
+        Instantiate(clone, _position, Quaternion.identity);
     }
     void Update()
     {

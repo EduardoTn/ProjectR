@@ -24,9 +24,11 @@ public class Player : Entity
     public PlayerAttackState attackState { get; private set; }
     public PlayerHitState hitState { get; private set; }
     public PlayerCounterState counterState { get; private set; }
+    public PlayerBlackHoleState blackHoleState { get; private set; }
     #endregion
     #region Listeners
     public void wallJump() => StartCoroutine(doJump());
+    public Collider2D[] GetEntity() => Physics2D.OverlapCircleAll(attackCheck.position, attackCheckRadius);
     #endregion
     #region Unity
     protected override void Awake()
@@ -40,6 +42,7 @@ public class Player : Entity
         attackState = new PlayerAttackState(stateMachine, this, "Attack");
         hitState = new PlayerHitState(stateMachine, this, "Hit");
         counterState = new PlayerCounterState(stateMachine, this, "Counter");
+        blackHoleState = new PlayerBlackHoleState(stateMachine, this, "Jump");
     }
     protected override void Start()
     {
@@ -52,6 +55,7 @@ public class Player : Entity
         base.Update();
         CounterController();
         DashController();
+        BlackHoleController();
     }
     #endregion
     #region Controllers
@@ -72,12 +76,35 @@ public class Player : Entity
             skill.parry.UseSkill();
         }
     }
+    private void BlackHoleController()
+    {
+        if (Input.GetKey(KeyCode.R) && skill.blackHole.CanUseSkill())
+        {
+            stateMachine.ChangeState(blackHoleState);
+        }
+    }
+    public void ExitBlackHole()
+    {
+        stateMachine.ChangeState(idleState);
+        MakeTransparent(false);
+    }
     public override void Damage(bool isHeavy, Entity attacker)
     {
         if (stateMachine.currentState is not PlayerDashState)
         {
             base.Damage(isHeavy, attacker);
         }
+    }
+    public bool isEnemyinArea()
+    {
+        Collider2D[] colliders = GetEntity();
+        foreach (var hit in colliders)
+        {
+            var enemy = hit.GetComponent<Enemy>();
+            if (enemy != null)
+                return true;
+        }
+        return false;
     }
     #endregion
     #region Actions

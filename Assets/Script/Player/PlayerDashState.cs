@@ -11,8 +11,8 @@ public class PlayerDashState : PlayerState
         base.Enter();
         stateTimer = player.dashDuration;
         player.rb.excludeLayers = player.enemyMask;
-        if (player.skill.clone.CanUseSkill())
-            player.skill.clone.UseSkill();
+        if (player.skill.clone.CanUseSkill() && player.isEnemyinArea())
+            player.skill.clone.SkillCast(player.transform.position, player.flip);
     }
 
     public override void Exit()

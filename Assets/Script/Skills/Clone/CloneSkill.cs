@@ -3,11 +3,13 @@ using UnityEngine;
 public class CloneSkill : Skill
 {
     [SerializeField] private GameObject clone;
+    private CloneSkillController controller;
     public float cloneDuration;
     public float colorLoosingSpeed;
-    public override void UseSkill()
+    public void SkillCast(Vector3 _position, bool _flip)
     {
         base.UseSkill();
-        Instantiate(clone, PlayerManager.instance.player.transform.position, Quaternion.identity);
+        controller = new CloneSkillController();
+        controller.CreateClone(_position, _flip, clone);
     }
 }
