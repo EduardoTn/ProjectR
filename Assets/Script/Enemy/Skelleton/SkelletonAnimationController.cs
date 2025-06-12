@@ -14,7 +14,7 @@ public class SkelletonAnimationController : MonoBehaviour
         {
             var player = hit.GetComponent<Player>();
             if (player != null)
-                player.Damage(false, skelleton);
+                player.Damage(false, skelleton, skelleton.damage);
         }
     }
     private void AttackHeavyTrigger()
@@ -24,7 +24,7 @@ public class SkelletonAnimationController : MonoBehaviour
         {
             var player = hit.GetComponent<Player>();
             if (player != null)
-                player.Damage(true, skelleton);
+                player.Damage(true, skelleton, skelleton.damage);
         }
     }
     protected void OpenCounterWindow() => skelleton.OpenCounterAttackWindow();

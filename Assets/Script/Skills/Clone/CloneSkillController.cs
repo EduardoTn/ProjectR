@@ -4,7 +4,7 @@ using UnityEngine;
 public class CloneSkillController : MonoBehaviour
 {
     [SerializeField] Transform attackCheck;
-    [SerializeField] float attackCheckRadius = 1;
+    [SerializeField] float attackCheckRadius;
     [SerializeField] GameObject clone;
     private float cloneDuration;
     private float colorLoosingSpeed;
@@ -21,6 +21,7 @@ public class CloneSkillController : MonoBehaviour
         player = PlayerManager.instance.player;
         cloneDuration = SkillManager.instance.clone.cloneDuration;
         colorLoosingSpeed = SkillManager.instance.clone.colorLoosingSpeed;
+        attackCheckRadius = 1;
         cloneTimer = cloneDuration;
         anim.SetInteger("AttackNumber", Random.Range(1, 3));
         if (!flip)
@@ -52,7 +53,7 @@ public class CloneSkillController : MonoBehaviour
         {
             var enemy = hit.GetComponent<Enemy>();
             if (enemy != null)
-                enemy.Damage(false, player);
+                enemy.Damage(false, player, player.damage);
         }
     }
     private void AttackHeavyTrigger()
@@ -62,7 +63,7 @@ public class CloneSkillController : MonoBehaviour
         {
             var enemy = hit.GetComponent<Enemy>();
             if (enemy != null)
-                enemy.Damage(true, player);
+                enemy.Damage(true, player, player.damage);
         }
     }
     protected virtual void OnDrawGizmos()

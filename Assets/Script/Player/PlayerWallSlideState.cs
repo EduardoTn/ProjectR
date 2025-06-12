@@ -13,7 +13,7 @@ public class PlayerWallSlideState : PlayerState
 
         if (!ignoreInput)
         {
-            if (Input.GetButtonDown("Jump"))
+            if (player.commands.Player.Jump.WasPressedThisFrame())
                 player.wallJump();
             if (xInput != 0)
                 player.rb.linearVelocityY = player.rb.linearVelocityY * 0.7f;

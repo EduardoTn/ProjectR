@@ -4,6 +4,13 @@ using UnityEngine;
 public class Entity : MonoBehaviour
 {
     #region Components
+    [Header("Combat info")]
+    [SerializeField] protected float maxHP;
+    [SerializeField] GameObject hitVFX;
+    protected float currentHP;
+    protected bool isDead = false;
+    public float damage;
+    [Space]
     [Header("Knockback info")]
     [SerializeField] protected float knockbackDuration;
     public Vector2 knockbackDirection;
@@ -39,6 +46,7 @@ public class Entity : MonoBehaviour
 
     protected virtual void Awake()
     {
+        currentHP = maxHP;
         stateMachine = new StateMachine();
     }
 
@@ -47,10 +55,11 @@ public class Entity : MonoBehaviour
     {
         stateMachine.currentState.Update();
     }
-    public virtual void Damage(bool isHeavy, Entity attacker)
+    public virtual void Damage(bool isHeavy, Entity attacker, float _damage)
     {
         fx.StartCoroutine("FlashFX");
-        if (isHeavy)
+        TakeDamage(_damage);
+        if (isHeavy && !isDead)
             StartCoroutine(KnockBack(attacker));
     }
     public virtual void SetVelocity(float _xVelocity, float _yVelocity)
@@ -99,5 +108,18 @@ public class Entity : MonoBehaviour
         {
             sr.color = Color.white;
         }
+    }
+
+    public virtual void TakeDamage(float _damage)
+    {
+        currentHP -= _damage;
+        if (currentHP <= 0)
+            Die();
+        Instantiate(hitVFX, transform.position, Quaternion.identity);
+    }
+
+    protected virtual void Die()
+    {
+        isDead = true;
     }
 }

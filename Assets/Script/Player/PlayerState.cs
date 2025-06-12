@@ -27,7 +27,7 @@ public class PlayerState : State
         stateTimer -= Time.deltaTime;
         if (stateTimer < 0)
         {
-            xInput = Input.GetAxisRaw("Horizontal");
+            xInput = player.movemment.x;
             player.anim.SetFloat("yVelocity", rb.linearVelocityY);
             if (!ignoreInput)
             {
@@ -48,9 +48,9 @@ public class PlayerState : State
                                     stateMachine.ChangeState(player.jumpState);
                                 break;
                             case true:
-                                if (Input.GetButtonDown("Jump"))
+                                if (player.commands.Player.Jump.WasPressedThisFrame())
                                     stateMachine.ChangeState(player.jumpState);
-                                if (Input.GetKey(KeyCode.Mouse0))
+                                if (player.commands.Player.Attack.WasPressedThisFrame())
                                     stateMachine.ChangeState(player.attackState);
                                 break;
                         }

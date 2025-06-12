@@ -8,6 +8,7 @@ public class Skelleton : Enemy
     public SkelletonBattleState battleState { get; private set; }
     public SkelletonAttackState attackState { get; private set; }
     public SkelletonStunState stunState { get; private set; }
+    public SkelletoonDieState deathState { get; private set; }
     #endregion
     protected override void Awake()
     {
@@ -17,6 +18,7 @@ public class Skelleton : Enemy
         battleState = new SkelletonBattleState(stateMachine, this, "Move");
         attackState = new SkelletonAttackState(stateMachine, this, "Attack");
         stunState = new SkelletonStunState(stateMachine, this, "Stun");
+        deathState = new SkelletoonDieState(stateMachine, this, "Death");
     }
     protected override void Start()
     {
@@ -31,5 +33,11 @@ public class Skelleton : Enemy
     public override void ReceiveCounterAttack()
     {
         stateMachine.ChangeState(stunState);
+    }
+
+    protected override void Die()
+    {
+        base.Die();
+        stateMachine.ChangeState(deathState);
     }
 }

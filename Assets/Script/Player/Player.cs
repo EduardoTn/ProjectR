@@ -14,6 +14,8 @@ public class Player : Entity
     public float dashDuration = 0.5f;
     public float dashSpeed = 15;
     public Vector2[] attackMovement;
+    public Vector2 movemment { get; private set; }
+    public PlayerCommands commands { get; private set; }
     #endregion
     #region States
     public PlayerIdleState idleState { get; private set; }
@@ -25,6 +27,7 @@ public class Player : Entity
     public PlayerHitState hitState { get; private set; }
     public PlayerCounterState counterState { get; private set; }
     public PlayerBlackHoleState blackHoleState { get; private set; }
+    public PlayerDieState deathState { get; private set; }
     #endregion
     #region Listeners
     public void wallJump() => StartCoroutine(doJump());
@@ -34,6 +37,7 @@ public class Player : Entity
     protected override void Awake()
     {
         base.Awake();
+        commands = new PlayerCommands();
         idleState = new PlayerIdleState(stateMachine, this, "Idle");
         moveState = new PlayerMoveState(stateMachine, this, "Move");
         jumpState = new PlayerJumpState(stateMachine, this, "Jump");
@@ -43,6 +47,17 @@ public class Player : Entity
         hitState = new PlayerHitState(stateMachine, this, "Hit");
         counterState = new PlayerCounterState(stateMachine, this, "Counter");
         blackHoleState = new PlayerBlackHoleState(stateMachine, this, "Jump");
+        deathState = new PlayerDieState(stateMachine, this, "Die");
+    }
+    private void OnEnable()
+    {
+        commands.Enable();
+        commands.Player.Move.performed += ctx => movemment = ctx.ReadValue<Vector2>();
+        commands.Player.Move.canceled += ctx => movemment = Vector2.zero;
+    }
+    private void OnDisable()
+    {
+        commands.Disable();
     }
     protected override void Start()
     {
@@ -53,15 +68,18 @@ public class Player : Entity
     protected override void Update()
     {
         base.Update();
-        CounterController();
-        DashController();
-        BlackHoleController();
+        if (!isDead)
+        {
+            CounterController();
+            DashController();
+            BlackHoleController();
+        }
     }
     #endregion
     #region Controllers
     private void DashController()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && skill.dash.CanUseSkill())
+        if (commands.Player.Dash.WasPressedThisFrame() && skill.dash.CanUseSkill())
         {
             isKnocked = false;
             stateMachine.ChangeState(dashState);
@@ -70,7 +88,7 @@ public class Player : Entity
     }
     private void CounterController()
     {
-        if (Input.GetKey(KeyCode.Q) && skill.parry.CanUseSkill())
+        if (commands.Player.Parry.WasPressedThisFrame() && skill.parry.CanUseSkill())
         {
             stateMachine.ChangeState(counterState);
             skill.parry.UseSkill();
@@ -78,7 +96,7 @@ public class Player : Entity
     }
     private void BlackHoleController()
     {
-        if (Input.GetKey(KeyCode.R) && skill.blackHole.CanUseSkill())
+        if (commands.Player.Ultimate.WasPressedThisFrame() && skill.blackHole.CanUseSkill())
         {
             stateMachine.ChangeState(blackHoleState);
         }
@@ -88,12 +106,17 @@ public class Player : Entity
         stateMachine.ChangeState(idleState);
         MakeTransparent(false);
     }
-    public override void Damage(bool isHeavy, Entity attacker)
+    public override void Damage(bool isHeavy, Entity attacker, float _damage)
     {
         if (stateMachine.currentState is not PlayerDashState)
         {
-            base.Damage(isHeavy, attacker);
+            base.Damage(isHeavy, attacker, _damage);
         }
+    }
+    protected override void Die()
+    {
+        base.Die();
+        stateMachine.ChangeState(deathState);
     }
     public bool isEnemyinArea()
     {
@@ -110,7 +133,7 @@ public class Player : Entity
     #region Actions
     IEnumerator doJump()
     {
-        rb.linearVelocity = new Vector2(dashSpeed * (flip ? -1 : 1), jumpForce + speed);
+        rb.linearVelocity = new Vector2((dashSpeed/2) * (flip ? -1 : 1), jumpForce + speed);
         stateMachine.ChangeState(jumpState);
         stateMachine.currentState.ignoreInput = true;
         Flip();

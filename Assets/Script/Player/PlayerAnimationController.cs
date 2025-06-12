@@ -14,7 +14,7 @@ public class PlayerAnimationController : MonoBehaviour
         {
             var enemy = hit.GetComponent<Enemy>();
             if (enemy != null)
-                enemy.Damage(false, player);
+                enemy.Damage(false, player, player.damage);
         }
     }
     private void AttackHeavyTrigger()
@@ -24,7 +24,7 @@ public class PlayerAnimationController : MonoBehaviour
         {
             var enemy = hit.GetComponent<Enemy>();
             if (enemy != null)
-                enemy.Damage(true, player);
+                enemy.Damage(true, player, player.damage);
         }
     }
 }

@@ -236,6 +236,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 608ea39beab9e274098b7769704e6d6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHP: 100
+  hitVFX: {fileID: 4932949263669120138, guid: aef17863923023d4586339ccca0689c8, type: 3}
+  damage: 30
   knockbackDuration: 0.5
   knockbackDirection: {x: 8, y: 12}
   isKnocked: 0
